@@ -1,7 +1,7 @@
 //TODO: index elements by their x position
 
 let G = {
-  preventClick: false, //Prevent click while dragging
+  // preventClick: false, //Prevent click while dragging
   zIndex: 0
 }
 
@@ -12,9 +12,9 @@ const dragOpts = {
     endSpeed: 100
   },
   restrict: {
-    restriction: "parent",
+    restriction: 'parent',
     endOnly: true,
-    elementRect: { top: .01, left: .01, bottom: .99, right: .99 }
+    elementRect: { top: .07, left: .07, bottom: .93, right: .93 }
   },
   autoScroll: {
     container: document.body,
@@ -23,7 +23,7 @@ const dragOpts = {
     interval: 10
   },
   onmove: event => {
-    G.preventClick = true
+    // G.preventClick = true
     G.zIndex = G.zIndex + 1
     var el = event.target
     var x = (parseFloat(el.dataset.x) || 0) + event.dx
@@ -34,7 +34,7 @@ const dragOpts = {
     el.dataset.y = y
   },
   onend: event => {
-    setTimeout(() => G.preventClick = false, 50)
+    // setTimeout(() => G.preventClick = false, 50)
     //TODO: if it's close to the right edge of the viewport, extend all rows a bit, or somehow determine a suitable width for all rows
   }
 }
@@ -79,13 +79,15 @@ const wordForm = document.querySelector('#word-form')
 wordForm.addEventListener('submit', event => {
   event.preventDefault()
   const wordInput = document.querySelector('#word-input')
-  let word = wordInput.value
-  word = word.replace('/[ ]/gi', '') //todo: replace anything other than spaces?
+  const word = wordInput.value
 
   let html = `<section class="selectable word"><small class="">${word}</small>`
+
   for (var i = 0; i < word.length; i++) {
     const letter = word[i].toUpperCase()
-    html += `<button class="selectable letter">${letter}</button>`
+    if (letter != ' ') { //TODO: better check, or filter value before looping
+      html += `<button class="selectable letter">${letter}</button>`
+    }
   }
   html += '</section>'
   wordInput.value = '';
@@ -98,7 +100,7 @@ wordForm.addEventListener('submit', event => {
 document.addEventListener('click', event => {
   const el = event.target
 
-  if (el.matches('.selectable') && !G.preventClick) {
+  if (el.matches('.selectable')/* && !G.preventClick*/) {
     select(el)
   }
 
