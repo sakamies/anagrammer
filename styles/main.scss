@@ -26,6 +26,7 @@ html,body {
   font-size: 62.5%;
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
   text-transform: uppercase;
   height: 100%;
   min-height: 100%;
@@ -39,6 +40,7 @@ body {
   font-weight: 400;
   display: flex;
   flex-direction: column;
+  padding-top: 5rem
   // justify-content: flex-end;
 }
 
@@ -57,15 +59,11 @@ input, button {
 
 
 .word-form {
-  position: sticky;
-  flex: 0 1 auto;
+  position: fixed;
   z-index: 0;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-}
-.word-form:first-child {
-  margin-top: auto;
 }
 .word-form {
   display: flex;
@@ -78,30 +76,25 @@ input, button {
 }
 
 .word {
-  position: relative;
-  flex: 1 0 auto;
-  min-height: 20rem;
-  padding: 3rem 1rem 1rem;
-  margin-left: 1.5rem;
+  position: absolute;
 }
-.word:nth-child(odd) {
-  background: black(.05);
-}
-.word > small {
-  font-size: 1rem;
+.word-caption {
+  font-size: 1.25rem;
   position: absolute;
   top: .5rem;
   left: .5rem;
+  padding: 1rem;
+  background: black(.1);
 }
-
 .letter {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: absolute;
   width: 3rem;
   height: 5rem;
   line-height: 1.5rem;
+  margin: 1rem;
   background: white;
   box-shadow:
     0 0 0 1px black(.1),
@@ -115,4 +108,7 @@ input, button {
 }
 .drop-target {
   background: green;
+}
+.delete {
+  background: red;
 }

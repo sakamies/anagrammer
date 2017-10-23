@@ -13,9 +13,9 @@ const dragOpts = {
     endSpeed: 100
   },
   restrict: {
-    restriction: 'parent',
-    endOnly: true,
-    elementRect: { top: 0, left: 0, bottom: .93, right: .93 }
+    // restriction: 'parent',
+    // endOnly: true,
+    // elementRect: { top: 0, left: 0, bottom: .93, right: .93 }
   },
   autoScroll: {
     container: document.body,
@@ -26,13 +26,12 @@ const dragOpts = {
   onmove: event => {
     // G.preventClick = true
     G.zIndex = G.zIndex + 1
-    var el = event.target
-    var x = (parseFloat(el.dataset.x) || 0) + event.dx
-    var y = (parseFloat(el.dataset.y) || 0) + event.dy
-    el.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+    const el = event.target
+    const top = (parseFloat(el.style.top) || 0) + event.dy
+    const left = (parseFloat(el.style.left) || 0) + event.dx
+    el.style.top = top + 'px'
+    el.style.left = left + 'px'
     el.style.zIndex = G.zIndex
-    el.dataset.x = x
-    el.dataset.y = y
   },
   onend: event => {
     // setTimeout(() => G.preventClick = false, 50)
@@ -47,32 +46,32 @@ const trashOpts = {
     event.target.classList.add('drop-active')
   },
   ondragenter: event => {
-    console.log(event)
     const draggable = event.relatedTarget
     const dropzone = event.target
     dropzone.classList.add('drop-target')
-    draggable.classList.add('can-drop')
+    draggable.classList.add('delete')
   },
-  // ondragleave: event => {
-  //   const draggable = event.relatedTarget
-  //   const dropzone = event.target
-  //   event.target.classList.remove('drop-target');
-  //   event.relatedTarget.classList.remove('can-drop');
-  // },
-  // ondrop: event => {
-  //   const draggable = event.relatedTarget
-  //   const dropzone = event.target
-  // },
-  // ondropdeactivate: function (event) {
-  //   const draggable = event.relatedTarget
-  //   const dropzone = event.target
-  //   dropzone.classList.remove('drop-active');
-  //   dropzone.classList.remove('drop-target');
-  // }
+  ondragleave: event => {
+    const draggable = event.relatedTarget
+    const dropzone = event.target
+    event.target.classList.remove('drop-target');
+    event.relatedTarget.classList.remove('can-drop');
+  },
+  ondrop: event => {
+    const draggable = event.relatedTarget
+    const dropzone = event.target
+  },
+  ondropdeactivate: function (event) {
+    const draggable = event.relatedTarget
+    const dropzone = event.target
+    dropzone.classList.remove('drop-active');
+    dropzone.classList.remove('drop-target');
+  }
 }
 
 // target elements with the "draggable" class
 interact('.letter').draggable(dragOpts);
+interact('.word').draggable(dragOpts);
 interact('.trash').draggable(trashOpts);
 
 
@@ -81,16 +80,29 @@ wordForm.addEventListener('submit', event => {
   event.preventDefault()
   const wordInput = document.querySelector('#word-input')
   const word = wordInput.value
+  const id = (new Date).getTime()
 
-  let html = `<section class="selectable word"><small class="">${word}</small>`
+  const letters = [...document.querySelectorAll('.letter')]
+  let wordTop = 50
+  if (letters.length) {
+    const lowestLetter = letters.sort((a, b) => {
+      return a.getBoundingClientRect().bottom - b.getBoundingClientRect().bottom
+    }).pop()
+    wordTop =  lowestLetter.getBoundingClientRect().bottom + 20
+  }
+
+  let html = `<section data-word="${id}" style="left:0;top:${wordTop}px;" class="word"><small class="word-caption">${word}</small>`
 
   for (var i = 0; i < word.length; i++) {
     const letter = word[i].toUpperCase()
-    if (letter != ' ') { //TODO: better check, or filter value before looping
-      html += `<button class="selectable letter">${letter}</button>`
+    if (letter !== ' ') {
+      const left = (i * 30) + 'px'
+      html += `<button data-word="${id}" class="letter" style="top:50px;left:${left}">${letter}</button>`
     }
   }
-  html += '</section>'
+
+  html += `</section>`
+
   wordInput.value = '';
 
   wordForm.insertAdjacentHTML('beforebegin', html)
@@ -98,28 +110,49 @@ wordForm.addEventListener('submit', event => {
 })
 
 
-//TODO: click does not work on touch, maybe because of dragging?
-//TODO: dragging to trash doesn't work either!
-//TODO: clicking a section doesn't work either!
+
+//TODO: use tap event from interact.js instead of native click event
+interact('.letter').on('tap', event => {
+  const el = event.target
+  select(el, !el.classList.contains('selected'))
+});
+// interact('.word-caption').on('tap', event => {
+//   const el = event.currentTarget
+//   deselect();
+//   select(el, true);
+//   [...el.parentElement.querySelectorAll('.letter')].forEach(el => select(el, true))
+// });
+
+
 document.addEventListener('click', event => {
   const el = event.target
-
-  if (el.matches('.selectable')/* && !G.preventClick*/) {
-    select(el)
-  }
-
-  else if (el.matches('.trash-button')) {
-    console.log('trash')
-    const selection = [...document.querySelectorAll('.selected')]
-    console.log(selection)
+  if (el.matches('.trash-button')) {
+    let selection = [...document.querySelectorAll('.word-caption.selected')]
+    selection.forEach(el => el.parentElement.remove())
+    selection = [...document.querySelectorAll('.letter.selected')]
     selection.forEach(el => el.remove())
+  } else {
+    deselect()
   }
 })
 
 
-function select (el) {
-  const isSelected = el.getAttribute('aria-selected') === 'true';
-  el.setAttribute('aria-selected', String(!isSelected));
+function select (el, yep) {
+  console.log('select', el, yep)
+  el.setAttribute('aria-selected', String(yep));
   const cls = el.classList
-  isSelected ? cls.remove('selected') : cls.add('selected')
+  yep ? cls.add('selected') : cls.remove('selected')
+}
+function deselect() {
+  [...document.querySelectorAll('.selected')].forEach(el => select(el, false))
+}
+
+function getOffsetTop (el) {
+  var offsetTop = 0;
+  do {
+    if (!isNaN(el.offsetTop)) {
+      offsetTop += el.offsetTop;
+    }
+  } while(elem = el.offsetParent);
+  return offsetTop;
 }
