@@ -1,4 +1,5 @@
 //TODO: index elements by their x position
+//TODO: serialize & save data so reload doesn't wite everything out
 
 let G = {
   // preventClick: false, //Prevent click while dragging
@@ -14,7 +15,7 @@ const dragOpts = {
   restrict: {
     restriction: 'parent',
     endOnly: true,
-    elementRect: { top: .07, left: .07, bottom: .93, right: .93 }
+    elementRect: { top: 0, left: 0, bottom: .93, right: .93 }
   },
   autoScroll: {
     container: document.body,
@@ -97,6 +98,9 @@ wordForm.addEventListener('submit', event => {
 })
 
 
+//TODO: click does not work on touch, maybe because of dragging?
+//TODO: dragging to trash doesn't work either!
+//TODO: clicking a section doesn't work either!
 document.addEventListener('click', event => {
   const el = event.target
 
