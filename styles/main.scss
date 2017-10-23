@@ -1,0 +1,117 @@
+@function black($opacity: 1) {
+  @return rgba(0,0,0,$opacity);
+}
+@function white($opacity: 1) {
+  @return rgba(255,255,255,$opacity);
+}
+@function gray($amount, $opacity: 1) {
+  @return rgba($amount, $amount, $amount, $opacity);
+}
+@function opacity($color, $opacity: 1) {
+  @return rgba($color, $opacity);
+}
+
+$dark: #333;
+$light: #f9f9f9;
+
+*, *::before, *::after {
+  font: inherit;
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+html,body {
+  font-size: 62.5%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-transform: uppercase;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-size: 2rem;
+  line-height: 2rem;
+  font-family: sans-serif;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  // justify-content: flex-end;
+}
+
+input, button {
+  -webkit-appearance: none;
+  font: inherit;
+  line-height: 3.5rem;
+  text-transform: uppercase;;
+  height: 5rem;
+  padding: 1rem;
+  color: $dark;
+  background: white;
+  border: none;
+  background: white;
+}
+
+
+.word-form {
+  position: sticky;
+  flex: 0 1 auto;
+  z-index: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+.word-form:first-child {
+  margin-top: auto;
+}
+.word-form {
+  display: flex;
+}
+.word-form input {
+  flex: 1 0 auto;
+}
+.word-form button {
+  width: 5rem;
+}
+
+.word {
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 20rem;
+  padding: 3rem 1rem 1rem 1rem;
+}
+.word:nth-child(odd) {
+  background: black(.05);
+}
+.word > small {
+  font-size: 1rem;
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+}
+
+.letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 2.5rem;
+  height: 5rem;
+  line-height: 1.5rem;
+  background: white;
+  box-shadow:
+    0 0 0 1px black(.1),
+    0 2px 10px black(.3);
+}
+
+
+.selected {
+  color: white;
+  background: hsl(200, 50%, 50%) !important;
+}
+.drop-target {
+  background: green;
+}

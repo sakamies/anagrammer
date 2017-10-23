@@ -1,0 +1,20 @@
+{
+  "name": "anagrammer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pingy dev",
+    "export": "pingy export"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@pingy/cli": "^0.9.3",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "ejs": "^2.5.7",
+    "node-sass": "^4.5.3"
+  }
+}
