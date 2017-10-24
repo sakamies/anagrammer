@@ -1,158 +1,162 @@
-//TODO: index elements by their x position
-//TODO: serialize & save data so reload doesn't wite everything out
+window.addEventListener('DOMContentLoaded', event => {
+  loadCanvas()
+})
 
-let G = {
-  // preventClick: false, //Prevent click while dragging
-  zIndex: 0
+let zIndex = 0
+let currentWord = ''
+const wordForm = document.querySelector('#word-form')
+const wordInput = document.querySelector('#word-input')
+const wordCaption = document.querySelector('#word-caption')
+const box = {
+  width: 30,
+  height: 50,
 }
 
 const dragOpts = {
   inertia: {
-    resistance: 20,
+    resistance: 15,
     minSpeed: 200,
     endSpeed: 100
   },
   restrict: {
-    // restriction: 'parent',
-    // endOnly: true,
-    // elementRect: { top: 0, left: 0, bottom: .93, right: .93 }
+    restriction: 'parent',
+    endOnly: true,
+    elementRect: { top: 0, left: 0, bottom: .93, right: .93 }
   },
-  autoScroll: {
-    container: document.body,
-    margin: 50,
-    distance: 5,
-    interval: 10
-  },
+  // autoScroll: {
+  //   container: document.body,
+  //   margin: 50,
+  //   distance: 5,
+  //   interval: 10
+  // },
   onmove: event => {
-    // G.preventClick = true
-    G.zIndex = G.zIndex + 1
     const el = event.target
     const top = (parseFloat(el.style.top) || 0) + event.dy
     const left = (parseFloat(el.style.left) || 0) + event.dx
+    // el.style.transform = `translate(${left}px,${top}px)`
     el.style.top = top + 'px'
     el.style.left = left + 'px'
-    el.style.zIndex = G.zIndex
+    // el.dataset.top = top
+    // el.dataset.left = left
+
+    zIndex = zIndex + 1
+    el.style.zIndex = zIndex
   },
   onend: event => {
-    // setTimeout(() => G.preventClick = false, 50)
-    //TODO: if it's close to the right edge of the viewport, extend all rows a bit, or somehow determine a suitable width for all rows
+    saveCanvas()
+    renderCaption()
+    //TODO: keep an index of letters, start at top left most letter and search its right center side with getElementFromPoint() and form words that way. Mark found strings of letters with a class and color
+    //TODO: Add save button to save found words
   }
 }
 
-const trashOpts = {
-  accept: '.letter',
-  overlap: 0.1,
-  ondropactivate: event => {
-    event.target.classList.add('drop-active')
-  },
-  ondragenter: event => {
-    const draggable = event.relatedTarget
-    const dropzone = event.target
-    dropzone.classList.add('drop-target')
-    draggable.classList.add('delete')
-  },
-  ondragleave: event => {
-    const draggable = event.relatedTarget
-    const dropzone = event.target
-    event.target.classList.remove('drop-target');
-    event.relatedTarget.classList.remove('can-drop');
-  },
-  ondrop: event => {
-    const draggable = event.relatedTarget
-    const dropzone = event.target
-  },
-  ondropdeactivate: function (event) {
-    const draggable = event.relatedTarget
-    const dropzone = event.target
-    dropzone.classList.remove('drop-active');
-    dropzone.classList.remove('drop-target');
+
+const handleSubmit = event => {
+  event.preventDefault()
+  if (!wordInput.value) return
+
+  currentWord = wordInput.value
+  wordCaption.innerText = currentWord
+  wordInput.value = ''
+
+  let html = ''
+  let top = 100
+  let left = box.width
+
+  for (var i = 0; i < currentWord.length; i++) {
+    const letter = currentWord[i].toUpperCase()
+    if (letter !== ' ') {
+      html += makeLetter({top, left, letter})
+    }
+
+    if (left > window.innerWidth - box.width * 2) {
+      top = top + 60
+      left = box.width
+    } else {
+      left = left + box.width
+    }
   }
+
+  renderLetters(html)
+  renderCaption()
+  saveCanvas()
 }
+
+
+
+
+function saveCanvas () {
+  const letters = [...document.querySelectorAll('.letter')].map((el, i) => {
+    return {
+      letter: el.innerText,
+      left: el.style.left,
+      top: el.style.top,
+    }
+  })
+
+  const data = {
+    currentWord,
+    letters,
+  }
+
+  localStorage.setItem('anagrammer-canvas', JSON.stringify(data))
+}
+
+function loadCanvas () {
+  const data = JSON.parse(localStorage.getItem('anagrammer-canvas'))
+  if (!data) return
+  let html = data.letters.map((item, i) => {
+    return makeLetter(item)
+  })
+  html = html.join('')
+
+  wordCaption.innerText = currentWord = data.currentWord
+  renderLetters(html)
+  renderCaption()
+}
+
+
+
+
+function makeLetter ({left, top, letter}) {
+  left = parseFloat(left)
+  top = parseFloat(top)
+  return `<button class="letter" style="left: ${left}px; top: ${top}px">${letter}</button>`
+}
+
+function renderLetters (html) {
+  //Blank out the document first
+  ;[...document.querySelectorAll('.letter')].forEach(el => el.remove())
+
+  //Add letters
+  wordForm.insertAdjacentHTML('afterend', html)
+}
+
+function renderCaption () {
+  const coords = findTopLeft()
+  wordCaption.style.left = coords.left + 'px'
+  wordCaption.style.top = coords.top - 40 + 'px'
+}
+
+
+function findTopLeft () {
+  let left = 999999
+  let top = 999999
+
+  ;[...document.querySelectorAll('.letter')].forEach(el => {
+    const elleft = parseFloat(el.style.left)
+    const eltop = parseFloat(el.style.top)
+    if (elleft < left) left = elleft
+    if (eltop < top) top = eltop
+  })
+  console.log('findTopLeft', left, top)
+
+  return {left, top}
+}
+
 
 // target elements with the "draggable" class
 interact('.letter').draggable(dragOpts);
-interact('.word').draggable(dragOpts);
-interact('.trash').draggable(trashOpts);
+wordForm.addEventListener('submit', handleSubmit)
 
 
-const wordForm = document.querySelector('#word-form')
-wordForm.addEventListener('submit', event => {
-  event.preventDefault()
-  const wordInput = document.querySelector('#word-input')
-  const word = wordInput.value
-  const id = (new Date).getTime()
-
-  const letters = [...document.querySelectorAll('.letter')]
-  let wordTop = 50
-  if (letters.length) {
-    const lowestLetter = letters.sort((a, b) => {
-      return a.getBoundingClientRect().bottom - b.getBoundingClientRect().bottom
-    }).pop()
-    wordTop =  lowestLetter.getBoundingClientRect().bottom + 20
-  }
-
-  let html = `<section data-word="${id}" style="left:0;top:${wordTop}px;" class="word"><small class="word-caption">${word}</small>`
-
-  for (var i = 0; i < word.length; i++) {
-    const letter = word[i].toUpperCase()
-    if (letter !== ' ') {
-      const left = (i * 30) + 'px'
-      html += `<button data-word="${id}" class="letter" style="top:50px;left:${left}">${letter}</button>`
-    }
-  }
-
-  html += `</section>`
-
-  wordInput.value = '';
-
-  wordForm.insertAdjacentHTML('beforebegin', html)
-  wordForm.previousElementSibling.scrollIntoView()
-})
-
-
-
-//TODO: use tap event from interact.js instead of native click event
-interact('.letter').on('tap', event => {
-  const el = event.target
-  select(el, !el.classList.contains('selected'))
-});
-// interact('.word-caption').on('tap', event => {
-//   const el = event.currentTarget
-//   deselect();
-//   select(el, true);
-//   [...el.parentElement.querySelectorAll('.letter')].forEach(el => select(el, true))
-// });
-
-
-document.addEventListener('click', event => {
-  const el = event.target
-  if (el.matches('.trash-button')) {
-    let selection = [...document.querySelectorAll('.word-caption.selected')]
-    selection.forEach(el => el.parentElement.remove())
-    selection = [...document.querySelectorAll('.letter.selected')]
-    selection.forEach(el => el.remove())
-  } else {
-    deselect()
-  }
-})
-
-
-function select (el, yep) {
-  console.log('select', el, yep)
-  el.setAttribute('aria-selected', String(yep));
-  const cls = el.classList
-  yep ? cls.add('selected') : cls.remove('selected')
-}
-function deselect() {
-  [...document.querySelectorAll('.selected')].forEach(el => select(el, false))
-}
-
-function getOffsetTop (el) {
-  var offsetTop = 0;
-  do {
-    if (!isNaN(el.offsetTop)) {
-      offsetTop += el.offsetTop;
-    }
-  } while(elem = el.offsetParent);
-  return offsetTop;
-}

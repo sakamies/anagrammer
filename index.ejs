@@ -15,10 +15,11 @@
   </head>
   <body>
 
+    <h1 id="word-caption" class="word-caption"></h1>
+
     <form id="word-form" class="word-form" action="">
-      <button type="button" id="trash-button" class="trash-button">🗑</button>
-      <input type="text" aria-label="Write here" placeholder="Write here" id="word-input" class="word-input">
-      <button type="submit" id="add-button" class="add-button">▶️</button>
+      <input type="text" aria-label="Write new word here" placeholder="Write new word here" id="word-input" class="word-input" value="">
+      <button type="submit" id="add-button" aria-label="Play" class="add-button">▶</button>
     </form>
 
     <script src="scripts/interact.min.js"></script>
