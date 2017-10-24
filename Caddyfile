@@ -1,0 +1,5 @@
+:3000 {
+  proxy / localhost:57716 {
+    transparent
+  }
+}
