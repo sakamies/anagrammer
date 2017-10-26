@@ -44,7 +44,6 @@ const dragOpts = {
   },
   onend: event => {
     saveCanvas()
-    renderCaption()
     //TODO: keep an index of letters, start at top left most letter and search its right center side with getElementFromPoint() and form words that way. Mark found strings of letters with a class and color
     //TODO: Add save button to save found words
   }
@@ -78,7 +77,6 @@ const handleSubmit = event => {
   }
 
   renderLetters(html)
-  renderCaption()
   saveCanvas()
 }
 
@@ -104,15 +102,20 @@ function saveCanvas () {
 
 function loadCanvas () {
   const data = JSON.parse(localStorage.getItem('anagrammer-canvas'))
-  if (!data) return
-  let html = data.letters.map((item, i) => {
-    return makeLetter(item)
-  })
-  html = html.join('')
 
-  wordCaption.innerText = currentWord = data.currentWord
-  renderLetters(html)
-  renderCaption()
+  if (data) {
+    let html = data.letters.map((item, i) => {
+      return makeLetter(item)
+    })
+    html = html.join('')
+
+    wordCaption.innerText = currentWord = data.currentWord
+    renderLetters(html)
+  }
+
+  if (!currentWord) {
+    wordInput.focus()
+  }
 }
 
 
@@ -130,28 +133,6 @@ function renderLetters (html) {
 
   //Add letters
   wordForm.insertAdjacentHTML('afterend', html)
-}
-
-function renderCaption () {
-  const coords = findTopLeft()
-  wordCaption.style.left = coords.left + 'px'
-  wordCaption.style.top = coords.top - 40 + 'px'
-}
-
-
-function findTopLeft () {
-  let left = 999999
-  let top = 999999
-
-  ;[...document.querySelectorAll('.letter')].forEach(el => {
-    const elleft = parseFloat(el.style.left)
-    const eltop = parseFloat(el.style.top)
-    if (elleft < left) left = elleft
-    if (eltop < top) top = eltop
-  })
-  console.log('findTopLeft', left, top)
-
-  return {left, top}
 }
 
 

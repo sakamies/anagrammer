@@ -34,7 +34,9 @@ body {
   line-height: 2rem;
   font-family: sans-serif;
   font-weight: 400;
-  padding: 12rem 2rem 2rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  padding: 6rem 2rem 2rem 2rem;
 }
 
 input, button {
@@ -81,11 +83,9 @@ button:active {
 .word-caption {
   font-size: 1.5rem;
   text-align: center;
-  position: absolute;
-  z-index: 0;
-  top: 5rem;
-  left: 1rem;
-  max-width: 90vw;
+  display: inline-block;
+  max-width: calc(100vw - 2rem);
+  margin: 0 auto;
   padding: .5rem 1rem;
   background: black(.1);
   border-radius: 50rem;
